@@ -9,52 +9,37 @@ import collections
 from Bio.Blast import NCBIXML
 
 
-
+#Only need input and output. Can expand later for number of alignments etc...
 parser = argparse.ArgumentParser(description='Extract query and hit description from a BLAST XML file, save as tab separated text file')
 
 parser.add_argument('-i','--input', dest='INPUT', metavar='FILE', help='Input BLASTXML file', required=True, type=argparse.FileType('r'))
 parser.add_argument('-o','--output', dest='OUTPUTFILENAME', help='Output file (tab delimited)', required=True)
 
-
 args = parser.parse_args()
 
-
+#Create new Dictionaly type
 alignment_dict = collections.defaultdict(list)
 
-
-
-#blast_records = NCBIXML.parse(open("/media/u4473753/DC_UNI_ARCHIVE1/PhD - Darren/Andrew/txOnCTg.nearDartMarkersx70_1kbp-updown_ctS317g_c0007401_6.xml"),'r')
+#Parse XML file
 blast_records = NCBIXML.parse(args.INPUT)
 blast_records = list(blast_records)
 
+#Iterate through, if no hits, return "No Hits", otherwise, return hit descriptions
 for blast_record in blast_records:
-    # for header in blast_records:
-    # print header.reference,
     temp_query = blast_record.query
-    #print(blast_record.query)
     if (blast_record.alignments):
         for alignment in blast_record.alignments:
-        #temp_hit_def = alignment.hit_def
-        #alignment_array.append({temp_query,alignment.hit_def})
-            #print(alignment.hit_def)
-            alignment_dict[temp_query].append(str(alignment.hit_def))
-        
+            alignment_dict[temp_query].append(str(alignment.hit_def))        
     else:    
-        #print("No Hits")
         alignment_dict[temp_query].append("No Hits")
-        #NB: In here, you will need to work out how to make a key and index or sanme key, different value sort of thing
 
-
-#d[k].append(v)
-
-
-#print(sorted(alignment_dict.items()))
-
+#Create filename string
 outputfile="./%s" % args.OUTPUTFILENAME
 
+#Open file, output key and each value as a list of "pairs"
 with open(outputfile, "w") as output:
-    for k,v in alignment_dict.iteritems():
-        #print "%s\t%s" % (str(k), str(v)[2:-2])
-        #writer.writerows(sorted(alignment_dict.items()))
-        output.write("%s\t%s\n" % (str(k), str(v)[2:-2]))
-        
+    for x in alignment_dict.keys():
+        for y in alignment_dict[x]:
+            #print "Key=%s, value=%s" % (x,y)
+            output.write("%s\t%s\n" % (x,y))
+            
